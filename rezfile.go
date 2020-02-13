@@ -3,7 +3,9 @@ package gorez
 import (
 	"encoding/binary"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"unsafe"
 )
 
@@ -14,7 +16,7 @@ type REZFile struct {
 	name string
 	// File size
 	size int64
-	// File REZ header
+	// File header
 	header REZMainHeader
 	// File File info entries
 	infoFiles []*REZEntryFileInfo
@@ -84,6 +86,44 @@ func (rf *REZFile) Read() (err error) {
 
 	if err = rf.readEntry(offset, maxOffset, ""); err != nil {
 		return
+	}
+	return nil
+}
+
+func (rf *REZFile) Extract(outputDir string) (count int, errors []error) {
+	for i := 0; i < len(rf.infoFiles); i++ {
+		var fileInfo = rf.infoFiles[i]
+
+		if fileInfo == nil {
+			continue
+		}
+
+		if err := rf.ExtractFile(fileInfo, filepath.Join(outputDir, fileInfo.FileFullName)); err != nil {
+			errors = append(errors, err)
+			continue
+		}
+		count++
+	}
+	return
+}
+
+func (rf *REZFile) ExtractFile(fileInfo *REZEntryFileInfo, destFile string) error {
+	var fileOutputDir = filepath.Dir(destFile)
+
+	if _, err := os.Stat(fileOutputDir); os.IsNotExist(err) {
+		if err := os.MkdirAll(fileOutputDir, os.ModePerm); err != nil {
+			return err
+		}
+	}
+
+	var buf = make([]byte, fileInfo.Size)
+
+	if _, err := rf.reader.ReadAt(buf, int64(fileInfo.Pos)); err != nil {
+		return err
+	}
+
+	if err := ioutil.WriteFile(destFile, buf, os.ModePerm); err != nil {
+		return err
 	}
 	return nil
 }
