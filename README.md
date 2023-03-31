@@ -92,7 +92,7 @@ func main() {
 
 	// [3] Extracts the very first file into its own directory
 	var ffInfo = rf[0]                                                 // File info struct
-	var ffName = fmt.Sprintf("%s.%s", ffInfo.FileName, ffInfo.FileExt) // File name without the directory structure
+	var ffName = fmt.Sprintf("%s.%s", ffInfo.FileName, ffInfo.FileExt) // File name w/ extension
 
 	if err := rez.ExtractFile(ffInfo, fmt.Sprintf(".\\EXT_first\\%s", ffName)); err != nil {
 		panic(err.Error())
