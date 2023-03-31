@@ -285,15 +285,15 @@ func (rf *REZFile) trimNTString(s string) (ret string) {
 func (rf *REZFile) reverseString(s string) string {
 	var strLen = len(s)
 
-	if strLen == 0 {
+	if strLen <= 1 {
 		return s
 	}
 
-	var strBuf = make([]rune, strLen)
+	var buf = make([]rune, strLen)
 
 	for _, c := range s {
 		strLen--
-		strBuf[strLen] = c
+		buf[strLen] = c
 	}
-	return string(strBuf[:])
+	return string(buf[:])
 }
